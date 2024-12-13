@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creativity Task - Remote Association Score Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        :root {
+            --primary-bg: #e0e5ec;
+            --primary-text: #2d4059;
+            --shadow-light: #ffffff;
+            --shadow-dark: #a3b1c6;
+            --accent: #4a90e2;
+        }
+
+        .dark-mode {
+            --primary-bg: #2d3436;
+            --primary-text: #dfe6e9;
+            --shadow-light: #353b48;
+            --shadow-dark: #2d3436;
+            --accent: #74b9ff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--primary-bg);
+            color: var(--primary-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: var(--primary-bg);
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                       -5px -5px 10px var(--shadow-light);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            border-radius: 20px;
+            background: var(--primary-bg);
+            box-shadow: 10px 10px 20px var(--shadow-dark),
+                       -10px -10px 20px var(--shadow-light);
+            animation: fadeIn 0.5s ease-out;
+            margin-bottom: 5rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--accent);
+            font-size: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            background: var(--primary-bg);
+            box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                       inset -5px -5px 10px var(--shadow-light);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary-bg);
+            color: var(--primary-text);
+            box-shadow: inset 3px 3px 7px var(--shadow-dark),
+                       inset -3px -3px 7px var(--shadow-light);
+            font-size: 1rem;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                       inset -4px -4px 8px var(--shadow-light);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                       -5px -5px 10px var(--shadow-light);
+            transition: transform 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            background: var(--primary-bg);
+            box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                       inset -5px -5px 10px var(--shadow-light);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 1rem 0;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-bg);
+            text-align: center;
+            box-shadow: 0 -5px 15px var(--shadow-dark);
+            z-index: 1000;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .footer-content {
+            font-size: 1rem;
+            color: var(--primary-text);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-content span {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                transform: translate(100px, 100px) rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+                margin-bottom: 4rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .footer-content {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="theme-toggle" onclick="toggleTheme()">🌓</div>
+    
+    <div class="container">
+        <h1>Remote Association Score Calculator</h1>
+        
+        <div class="input-group">
+            <label for="section1">Questions 1-6 (Correct Answers):</label>
+            <input type="number" id="section1" min="0" max="6" placeholder="Enter number (0-6)">
+        </div>
+
+        <div class="input-group">
+            <label for="section2">Questions 7-13 (Correct Answers):</label>
+            <input type="number" id="section2" min="0" max="7" placeholder="Enter number (0-7)">
+        </div>
+
+        <div class="input-group">
+            <label for="section3">Questions 14-20 (Correct Answers):</label>
+            <input type="number" id="section3" min="0" max="7" placeholder="Enter number (0-7)">
+        </div>
+
+        <button onclick="calculateScore()">Calculate Score</button>
+
+        <div class="result" id="result">
+            <h2>Your Total Score</h2>
+            <div class="score" id="scoreDisplay">0</div>
+            <p id="breakdown"></p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <span>Center for Engineering Education Innovation</span> | Year 2024-2025
+        </div>
+    </footer>
+
+    <script>
+        // Create floating circles for background animation
+        function createBackgroundAnimation() {
+            const container = document.querySelector('.background-animation');
+            for (let i = 0; i < 15; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'floating-circle';
+                circle.style.width = Math.random() * 100 + 50 + 'px';
+                circle.style.height = circle.style.width;
+                circle.style.left = Math.random() * 100 + 'vw';
+                circle.style.top = Math.random() * 100 + 'vh';
+                circle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(circle);
+            }
+        }
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        // Score calculation
+        function calculateScore() {
+            const section1 = parseInt(document.getElementById('section1').value) || 0;
+            const section2 = parseInt(document.getElementById('section2').value) || 0;
+            const section3 = parseInt(document.getElementById('section3').value) || 0;
+
+            // Input validation
+            if (section1 < 0 || section1 > 6 || section2 < 0 || section2 > 7 || section3 < 0 || section3 > 7) {
+                alert('Please enter valid numbers within the specified ranges.');
+                return;
+            }
+
+            // Calculate scores
+            const score1 = section1 * 1; // 1 point each
+            const score2 = section2 * 2; // 2 points each
+            const score3 = section3 * 3; // 3 points each
+            const totalScore = score1 + score2 + score3;
+
+            // Display results
+            const resultDiv = document.getElementById('result');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const breakdown = document.getElementById('breakdown');
+
+            resultDiv.classList.add('show');
+            scoreDisplay.textContent = totalScore;
+            breakdown.innerHTML = `
+                Section 1: ${score1} points<br>
+                Section 2: ${score2} points<br>
+                Section 3: ${score3} points
+            `;
+
+            // Animate score counting
+            animateScore(0, totalScore, scoreDisplay);
+        }
+
+        // Animate score counting
+        function animateScore(start, end, element) {
+            const duration = 1000;
+            const steps = 60;
+            const increment = (end - start) / steps;
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    clearInterval(timer);
+                    current = end;
+                }
+                element.textContent = Math.round(current);
+            }, duration / steps);
+        }
+
+        // Initialize background animation
+        createBackgroundAnimation();
+
+        // Add input validation
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value < 0) this.value = 0;
+                if (this.value > parseInt(this.max)) this.value = this.max;
+            });
+        });
+    </script>
+</body>
+</html>
